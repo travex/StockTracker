@@ -11,19 +11,16 @@ def load_keys(filename):
         keys = yaml.safe_load(f)
     return keys
 
-def create_url():
+def create_url(url_type, key, tweet_count = 100):
     tweet_fields = "tweet.fields=lang,author_id"
-    # Tweet fields are adjustable.
-    # Options include:
-    # attachments, author_id, context_annotations,
-    # conversation_id, created_at, entities, geo, id,
-    # in_reply_to_user_id, lang, non_public_metrics, organic_metrics,
-    # possibly_sensitive, promoted_metrics, public_metrics, referenced_tweets,
-    # source, text, and withheld
-    ids = "ids=1278747501642657792,1255542774432063488"
-    # You can adjust ids to include a single Tweets.
-    # Or you can add to up to 100 comma-separated IDs
-    url = "https://api.twitter.com/2/tweets?{}&{}".format(ids, tweet_fields)
+
+    #ids = "ids=1278747501642657792,1255542774432063488"
+    mvis = "mvis"
+    keyword = {"M": "mvis AND -$mvis", "T":"tesla OR tsla"}
+
+    list_url = {"RecentV2":"https://api.twitter.com/2/tweets/search/recent?query=",
+                "TweetsV1":"https://api.twitter.com/1.1/search/tweets.json?q="}
+    url = list_url[url_type] + keyword[key] + "&count={}".format(tweet_count)
     return url
 
 
@@ -49,7 +46,6 @@ if __name__ == '__main__':
     consumer_secret = TwitterKeys['APISecretKey']
     bearer_token = TwitterKeys['BearerToken']
 
-    url = create_url()
-    headers = create_headers(bearer_token)
-    data = connect_to_endpoint(url, headers)
+    url = create_url("TweetsV1","M",1)
+    data = connect_to_endpoint(url, create_headers(bearer_token))
     print(json.dumps(data, indent=4, sort_keys=True))
